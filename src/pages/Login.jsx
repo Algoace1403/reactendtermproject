@@ -19,7 +19,7 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setError("Please fill in both fields.");
       return;
     }
