@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, updateDoc, where, writeBatch } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
 import { LogOut, Moon, Save, Sun, Trash2 } from "lucide-react";
 import { auth, db } from "@/services/firebase.js";
@@ -10,6 +10,30 @@ import { useTheme } from "@/context/ThemeContext.jsx";
 import { useToast } from "@/context/ToastContext.jsx";
 import { signOut } from "@/services/auth.js";
 import ConfirmDialog from "@/components/ConfirmDialog.jsx";
+
+// Deletes every Firestore doc owned by a user before their auth record is
+// removed. Without this the docs become orphans — unreadable, unwritable,
+// still counted against free-tier storage. Batched writes max 500 ops so
+// we chunk at 400 to be safe.
+async function wipeUserData(userId) {
+  const collections = ["decks", "cards", "reviews"];
+  for (const name of collections) {
+    const snap = await getDocs(query(collection(db, name), where("userId", "==", userId)));
+    let batch = writeBatch(db);
+    let n = 0;
+    for (const d of snap.docs) {
+      batch.delete(d.ref);
+      n += 1;
+      if (n % 400 === 0) {
+        await batch.commit();
+        batch = writeBatch(db);
+      }
+    }
+    if (n % 400 !== 0) await batch.commit();
+  }
+  // Finally the user profile doc itself
+  await deleteDoc(doc(db, "users", userId));
+}
 
 export default function Settings() {
   const { user } = useAuth();
@@ -47,9 +71,18 @@ export default function Settings() {
   }
 
   async function handleDeleteAccount() {
+    const current = auth.currentUser;
+    if (!current) {
+      toast.error("Not signed in.");
+      return;
+    }
     try {
-      await deleteUser(auth.currentUser);
-      toast.success("Account deleted.");
+      // IMPORTANT: wipe Firestore docs BEFORE deleteUser. Once the auth
+      // record is gone the security rules reject any further writes for
+      // this uid, so anything left over stays orphaned forever.
+      await wipeUserData(current.uid);
+      await deleteUser(current);
+      toast.success("Account and all data deleted.");
       navigate("/", { replace: true });
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
@@ -112,7 +145,7 @@ export default function Settings() {
       <section className="card mt-4 border-danger-500/30 p-6">
         <h2 className="font-display text-lg font-bold text-danger-600">Danger zone</h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-          Permanently delete your account. Your decks and cards will be orphaned but the auth record is removed.
+          Permanently delete your account, all your decks, cards, and review history. This cannot be undone.
         </p>
         <button
           onClick={() => setConfirmDelete(true)}
