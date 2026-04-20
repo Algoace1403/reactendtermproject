@@ -17,6 +17,7 @@ export default function StudySession() {
   const navigate = useNavigate();
   const {
     loading,
+    error,
     total,
     cursor,
     done,
@@ -50,6 +51,30 @@ export default function StudySession() {
     return (
       <div className="mx-auto grid max-w-3xl place-items-center px-6 py-16">
         <Spinner label="Loading session…" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-12 text-center">
+        <div className="card border-danger-500/30 p-10">
+          <h1 className="font-display text-2xl font-bold text-danger-600">
+            Couldn't load this deck.
+          </h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Check your internet connection or try again in a moment. If the
+            problem sticks around, sign out and back in.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <Link to={`/decks/${deckId}`} className="btn-secondary inline-flex">
+              <ArrowLeft className="h-4 w-4" /> Back to deck
+            </Link>
+            <button className="btn-primary" onClick={() => window.location.reload()}>
+              Retry
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

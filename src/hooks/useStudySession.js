@@ -8,7 +8,7 @@ import { bumpStreak, reviewCard } from "@/services/reviews.js";
 export function useStudySession(deckId) {
   const { user } = useAuth();
   const { profile } = useUserProfile();
-  const { cards, loading } = useCards(deckId);
+  const { cards, loading, error } = useCards(deckId);
 
   const [queue, setQueue] = useState([]);      // array of card ids in study order
   const [cursor, setCursor] = useState(0);     // index into queue
@@ -68,6 +68,7 @@ export function useStudySession(deckId) {
 
   return {
     loading,
+    error,
     total,
     cursor,
     done,

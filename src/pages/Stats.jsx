@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -10,10 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { BookOpen, Flame, Sparkles, Target } from "lucide-react";
+import { BookOpen, Flame, Plus, Sparkles, Target } from "lucide-react";
 import { useStats } from "@/hooks/useStats.js";
 import { useUserProfile } from "@/hooks/useUserProfile.js";
 import { useTheme } from "@/context/ThemeContext.jsx";
+import EmptyState from "@/components/EmptyState.jsx";
 import Spinner from "@/components/Spinner.jsx";
 
 export default function Stats() {
@@ -46,6 +48,25 @@ export default function Stats() {
     return (
       <div className="mx-auto max-w-6xl px-5 py-10">
         <div className="card p-12 text-center"><Spinner /></div>
+      </div>
+    );
+  }
+
+  // Brand-new user with nothing to show yet — empty charts look broken, so
+  // we fall back to an onboarding prompt instead.
+  if (totalCards === 0 && totalReviews === 0) {
+    return (
+      <div className="mx-auto max-w-3xl px-5 py-10">
+        <EmptyState
+          icon={<Sparkles className="h-5 w-5" />}
+          title="Stats will appear once you start studying"
+          description="Create a deck, add a few cards, and do one review session. Your mastery, streak, and activity will show up here."
+          action={
+            <Link to="/decks" className="btn-primary">
+              <Plus className="h-4 w-4" /> Create your first deck
+            </Link>
+          }
+        />
       </div>
     );
   }
