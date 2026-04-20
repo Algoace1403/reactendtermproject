@@ -106,8 +106,8 @@ export default function GenerateFromNotes({ open, onClose, onImport }) {
             Preview ({cards.length} cards)
           </p>
           <div className="max-h-[220px] space-y-2 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
-            {cards.map((c, i) => (
-              <div key={i} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-950">
+            {cards.map((c) => (
+              <div key={`${c.question}|${c.answer}`} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-950">
                 <p className="font-semibold text-slate-900 dark:text-white">Q. {c.question}</p>
                 <p className="mt-0.5 text-slate-600 dark:text-slate-300">A. {c.answer}</p>
               </div>

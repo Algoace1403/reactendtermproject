@@ -64,8 +64,8 @@ export default function BulkPaste({ open, onClose, onImport }) {
                 Paste text to see parsed cards here.
               </p>
             ) : (
-              preview.map((p, i) => (
-                <div key={i} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-950">
+              preview.map((p) => (
+                <div key={`${p.question}|${p.answer}`} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-950">
                   <p className="font-semibold text-slate-900 dark:text-white">Q. {p.question}</p>
                   <p className="mt-0.5 text-slate-600 dark:text-slate-300">A. {p.answer}</p>
                 </div>
