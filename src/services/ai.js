@@ -36,7 +36,16 @@ export async function generateCards(notes) {
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new Error(`AI request failed (${res.status}).`);
+    // Gemini returns { error: { code, message, status } }. Surface the
+    // message so users get "API key not valid" instead of a bare "400".
+    let detail = "";
+    try {
+      const errBody = await res.json();
+      detail = errBody?.error?.message ? ` — ${errBody.error.message}` : "";
+    } catch {
+      /* body wasn't JSON — fall through with just the status */
+    }
+    throw new Error(`AI request failed (${res.status})${detail}`);
   }
   const data = await res.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";

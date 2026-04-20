@@ -125,13 +125,20 @@ export default function DeckDetail() {
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" /> Delete
           </button>
-          <Link
-            to={`/study/${deckId}`}
-            className={`btn-primary ${cards.length === 0 ? "pointer-events-none opacity-50" : ""}`}
-            aria-disabled={cards.length === 0}
-          >
-            <Play className="h-4 w-4" aria-hidden="true" /> Study now
-          </Link>
+          {cards.length === 0 ? (
+            <button
+              type="button"
+              disabled
+              title="Add at least one card to start studying"
+              className="btn-primary cursor-not-allowed opacity-50"
+            >
+              <Play className="h-4 w-4" aria-hidden="true" /> Study now
+            </button>
+          ) : (
+            <Link to={`/study/${deckId}`} className="btn-primary">
+              <Play className="h-4 w-4" aria-hidden="true" /> Study now
+            </Link>
+          )}
         </div>
       </header>
 
