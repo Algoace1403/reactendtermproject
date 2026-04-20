@@ -13,11 +13,29 @@ import {
 import { BookOpen, Flame, Sparkles, Target } from "lucide-react";
 import { useStats } from "@/hooks/useStats.js";
 import { useUserProfile } from "@/hooks/useUserProfile.js";
+import { useTheme } from "@/context/ThemeContext.jsx";
 import Spinner from "@/components/Spinner.jsx";
 
 export default function Stats() {
   const { profile } = useUserProfile();
+  const { theme } = useTheme();
   const { mastery, activity, heat, totalCards, totalReviews, todayReviews, loading } = useStats();
+
+  // Theme-aware chart colours. The grid was hard-coded light slate before
+  // which made it invisible in dark mode. These match our Tailwind palette.
+  const isDark = theme === "dark";
+  const gridStroke = isDark ? "#334155" : "#E2E8F0"; // slate-700 / slate-200
+  const axisTick = isDark ? "#94A3B8" : "#64748B";   // slate-400 / slate-500
+  const tooltipBg = isDark ? "#1E293B" : "#FFFFFF";
+  const tooltipBorder = isDark ? "#334155" : "#E2E8F0";
+  const tooltipText = isDark ? "#E2E8F0" : "#0F172A";
+  const tooltipStyle = {
+    borderRadius: 12,
+    border: `1px solid ${tooltipBorder}`,
+    backgroundColor: tooltipBg,
+    color: tooltipText,
+    fontSize: 12,
+  };
 
   const avgMastery = useMemo(() => {
     if (mastery.length === 0) return 0;
@@ -60,11 +78,11 @@ export default function Stats() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={mastery} margin={{ top: 5, right: 12, bottom: 0, left: -20 }}>
-                  <CartesianGrid stroke="#E2E8F0" strokeDasharray="3 3" />
-                  <XAxis dataKey="title" tick={{ fontSize: 10, fill: "#64748B" }} interval={0} />
-                  <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 10, fill: "#64748B" }} />
+                  <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
+                  <XAxis dataKey="title" tick={{ fontSize: 10, fill: axisTick }} interval={0} />
+                  <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 10, fill: axisTick }} />
                   <Tooltip
-                    contentStyle={{ borderRadius: 12, border: "1px solid #E2E8F0", fontSize: 12 }}
+                    contentStyle={tooltipStyle}
                     formatter={(v) => [`${v}%`, "mastered"]}
                   />
                   <Bar dataKey="pct" fill="#4F46E5" radius={[6, 6, 0, 0]} />
@@ -82,10 +100,10 @@ export default function Stats() {
           <div className="mt-4 h-56">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={activity} margin={{ top: 5, right: 12, bottom: 0, left: -20 }}>
-                <CartesianGrid stroke="#E2E8F0" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#64748B" }} interval={1} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#64748B" }} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #E2E8F0", fontSize: 12 }} />
+                <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: axisTick }} interval={1} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: axisTick }} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
